@@ -12,17 +12,17 @@ var fullCardDecks = [52]string{
 	"AS", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "TS", "JS", "QS", "KS",
 }
 
-type DeckRepository struct {
+type deckRepository struct {
 	Decks map[string]shared.Deck
 }
 
-func NewDeckRepository() *DeckRepository {
-	return &DeckRepository{
+func NewDeckRepository() DeckRepository {
+	return &deckRepository{
 		Decks: make(map[string]shared.Deck),
 	}
 }
 
-func (r *DeckRepository) CreateDeck(pool []string, shuffled bool) string {
+func (r *deckRepository) Create(pool []string, shuffled bool) string {
 	deck := shared.Deck{
 		ID:        r.generateID(),
 		Shuffled:  shuffled,
@@ -34,30 +34,30 @@ func (r *DeckRepository) CreateDeck(pool []string, shuffled bool) string {
 	return deck.ID
 }
 
-func (r *DeckRepository) GetDeck(id string) (shared.Deck, error) {
-	deck, ok := r.Decks[id]
-	if !ok {
-		return deck, shared.ErrDeckNotFound
-	}
-	return deck, nil
-}
+// func (r *DeckRepository) GetDeck(id string) (shared.Deck, error) {
+// 	deck, ok := r.Decks[id]
+// 	if !ok {
+// 		return deck, shared.ErrDeckNotFound
+// 	}
+// 	return deck, nil
+// }
 
-func (r *DeckRepository) Draw(id string, count int) (shared.Deck, bool) {
-	deck, ok := r.Decks[id]
-	if !ok {
-		return deck, false
-	}
+// func (r *DeckRepository) Draw(id string, count int) (shared.Deck, bool) {
+// 	deck, ok := r.Decks[id]
+// 	if !ok {
+// 		return deck, false
+// 	}
 
-	if len(deck.Cards) < count {
-		return deck, false
-	}
+// 	if len(deck.Cards) < count {
+// 		return deck, false
+// 	}
 
-	deck.Cards = deck.Cards[:count]
-	deck.Remaining = len(deck.Cards)
+// 	deck.Cards = deck.Cards[:count]
+// 	deck.Remaining = len(deck.Cards)
 
-	return deck, true
-}
+// 	return deck, true
+// }
 
-func (r *DeckRepository) generateID() string {
+func (r *deckRepository) generateID() string {
 	return uuid.New().String()
 }

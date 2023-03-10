@@ -9,17 +9,17 @@ import (
 	"github.com/galuhpradipta/card-deck-api/shared"
 )
 
-type DeckService struct {
-	deckRepository *repositories.DeckRepository
+type deckService struct {
+	deckRepository repositories.DeckRepository
 }
 
-func NewDeckService(deckRepository *repositories.DeckRepository) *DeckService {
-	return &DeckService{
+func NewDeckService(deckRepository repositories.DeckRepository) DeckService {
+	return &deckService{
 		deckRepository: deckRepository,
 	}
 }
 
-func (s *DeckService) CreateDeck(shuffled bool, cards []string) (shared.Deck, error) {
+func (s *deckService) Create(shuffled bool, cards []string) (shared.Deck, error) {
 	deckCards := fullCardDecks
 	if len(cards) > 0 {
 		deckCards = cards
@@ -33,7 +33,7 @@ func (s *DeckService) CreateDeck(shuffled bool, cards []string) (shared.Deck, er
 		deckCards = shuffle(deckCards)
 	}
 
-	deckID := s.deckRepository.CreateDeck(deckCards, shuffled)
+	deckID := s.deckRepository.Create(deckCards, shuffled)
 
 	return shared.Deck{
 		ID:        deckID,

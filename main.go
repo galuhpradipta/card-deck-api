@@ -22,7 +22,7 @@ func main() {
 	app := fiber.New()
 
 	app.Get("/decks/:id", getDeck)
-	app.Post("/decks", deckHandler.CreateDeck)
+	app.Post("/decks", deckHandler.Create)
 	app.Post("/decks/:id/draw", drawDeckHandler)
 	app.Listen(":3000")
 }
