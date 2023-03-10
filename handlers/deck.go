@@ -52,6 +52,36 @@ func (h *deckHandler) GetByID(c *fiber.Ctx) error {
 	return c.JSON(deck)
 }
 
+func (h *deckHandler) Draw(c *fiber.Ctx) error {
+	var req drawDeckRequest
+	err := c.BodyParser(&req)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	if req.Count < 1 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Count must be greater than 0",
+		})
+	}
+
+	id := c.Params("id")
+	cards, err := h.deckService.Draw(id, req.Count)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(cards)
+}
+
+type drawDeckRequest struct {
+	Count int `json:"count"`
+}
+
 type createDeckRequest struct {
 	Shuffled bool     `json:"shuffled"`
 	Cards    []string `json:"cards"`

@@ -59,6 +59,32 @@ func (s *deckService) GetByID(id string) (shared.Deck, error) {
 	return deck, nil
 }
 
+func (s *deckService) Draw(id string, count int) ([]shared.Card, error) {
+	deck, err := s.deckRepository.GetDeck(id)
+	if err != nil {
+		return []shared.Card{}, err
+	}
+
+	if count > len(deck.Pool) {
+		return []shared.Card{}, errors.New("Count must be less than or equal to remaining cards")
+	}
+
+	drawedCards := deck.Pool[:count]
+	deck.Pool = deck.Pool[count:]
+	deck.Remaining = len(deck.Pool)
+	s.deckRepository.Update(deck.ID, deck.Pool, deck.Shuffled)
+
+	for _, v := range drawedCards {
+		deck.Cards = append(deck.Cards, shared.Card{
+			Value: v[:len(v)-1],
+			Suit:  v[len(v)-1:],
+			Code:  v,
+		})
+	}
+
+	return deck.Cards, nil
+}
+
 var fullCardDecks = []string{
 	"AC", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "TC", "JC", "QC", "KC",
 	"AD", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "TD", "JD", "QD", "KD",

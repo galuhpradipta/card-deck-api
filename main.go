@@ -10,8 +10,6 @@ import (
 	"github.com/galuhpradipta/card-deck-api/services"
 )
 
-var decks = make(map[string]Deck)
-
 func main() {
 	deckRepository := repositories.NewDeckRepository()
 	deckService := services.NewDeckService(deckRepository)
@@ -20,7 +18,7 @@ func main() {
 	app := fiber.New()
 	app.Get("/decks/:id", deckHandler.GetByID)
 	app.Post("/decks", deckHandler.Create)
-	app.Post("/decks/:id/draw", drawDeckHandler)
+	app.Post("/decks/:id/draw", deckHandler.Draw)
 
 	log.Fatal(app.Listen(":3000"))
 }
@@ -30,105 +28,6 @@ var FullCardDecks = [52]string{
 	"AD", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "TD", "JD", "QD", "KD",
 	"AH", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "TH", "JH", "QH", "KH",
 	"AS", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "TS", "JS", "QS", "KS",
-}
-
-type Cards []string
-
-type Card struct {
-	Code  string `json:"code"`
-	Type  string `json:"type"`
-	Value string `json:"value"`
-}
-type Deck struct {
-	ID        string   `json:"id"`
-	Shuffled  bool     `json:"shuffled"`
-	Remaining int      `json:"remaining"`
-	Cards     []string `json:"cards"`
-}
-
-type drawDeckRequest struct {
-	Count int `json:"count"`
-}
-
-func drawDeckHandler(c *fiber.Ctx) error {
-	var req drawDeckRequest
-	err := c.BodyParser(&req)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Bad request",
-		})
-	}
-
-	if req.Count < 1 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Count must be greater than 0",
-		})
-	}
-
-	id := c.Params("id")
-	deck, ok := decks[id]
-	if !ok {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "Deck not found",
-		})
-	}
-
-	if req.Count > deck.Remaining {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Count must be less than or equal to remaining cards",
-		})
-	}
-
-	cards := deck.Cards[:req.Count]
-	deck.Cards = deck.Cards[req.Count:]
-	deck.Remaining = len(deck.Cards)
-	decks[deck.ID] = deck
-
-	var responseCards []Card
-	for _, val := range cards {
-		card := Card{
-			Code:  val,
-			Type:  cardTypeMap[val[1:]],
-			Value: cardValueMap[val[:1]],
-		}
-		responseCards = append(responseCards, card)
-	}
-
-	return c.JSON(responseCards)
-}
-
-func getDeck(c *fiber.Ctx) error {
-	id := c.Params("id")
-	deck, ok := decks[id]
-	if !ok {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "Deck not found",
-		})
-	}
-
-	var cards []Card
-	for _, val := range deck.Cards {
-		card := Card{
-			Code:  val,
-			Type:  cardTypeMap[val[1:]],
-			Value: cardValueMap[val[:1]],
-		}
-		cards = append(cards, card)
-	}
-
-	return c.JSON(GetDeckResponse{
-		DeckID:    deck.ID,
-		Shuffled:  deck.Shuffled,
-		Remaining: deck.Remaining,
-		Cards:     cards,
-	})
-}
-
-type GetDeckResponse struct {
-	DeckID    string `json:"deck_id"`
-	Shuffled  bool   `json:"shuffled"`
-	Remaining int    `json:"remaining"`
-	Cards     []Card `json:"cards"`
 }
 
 var cardTypeMap = map[string]string{

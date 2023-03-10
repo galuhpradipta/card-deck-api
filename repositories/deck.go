@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"errors"
+
 	"github.com/galuhpradipta/card-deck-api/shared"
 	"github.com/google/uuid"
 )
@@ -24,10 +26,9 @@ func NewDeckRepository() DeckRepository {
 
 func (r *deckRepository) Create(pool []string, shuffled bool) string {
 	deck := shared.Deck{
-		ID:        r.generateID(),
-		Shuffled:  shuffled,
-		Remaining: len(pool),
-		Pool:      pool,
+		ID:       r.generateID(),
+		Shuffled: shuffled,
+		Pool:     pool,
 	}
 
 	r.Decks[deck.ID] = deck
@@ -37,26 +38,18 @@ func (r *deckRepository) Create(pool []string, shuffled bool) string {
 func (r *deckRepository) GetDeck(id string) (shared.Deck, error) {
 	deck, ok := r.Decks[id]
 	if !ok {
-		return deck, shared.ErrDeckNotFound
+		return deck, errors.New("Deck not found")
 	}
+	deck.Remaining = len(deck.Pool)
 	return deck, nil
 }
 
-// func (r *DeckRepository) Draw(id string, count int) (shared.Deck, bool) {
-// 	deck, ok := r.Decks[id]
-// 	if !ok {
-// 		return deck, false
-// 	}
-
-// 	if len(deck.Cards) < count {
-// 		return deck, false
-// 	}
-
-// 	deck.Cards = deck.Cards[:count]
-// 	deck.Remaining = len(deck.Cards)
-
-// 	return deck, true
-// }
+func (r *deckRepository) Update(id string, pool []string, shuffled bool) {
+	deck := r.Decks[id]
+	deck.Pool = pool
+	deck.Shuffled = shuffled
+	r.Decks[id] = deck
+}
 
 func (r *deckRepository) generateID() string {
 	return uuid.New().String()
