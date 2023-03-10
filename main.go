@@ -11,8 +11,9 @@ var decks = make(map[string]Deck)
 
 func main() {
 	app := fiber.New()
-	app.Post("/decks", createDecHandler)
 	app.Get("/decks/:id", getDeck)
+	app.Post("/decks", createDecHandler)
+	app.Post("/decks/:id/draw", drawDeckHandler)
 	app.Listen(":3000")
 }
 
@@ -66,6 +67,57 @@ func createDecHandler(c *fiber.Ctx) error {
 	decks[deck.ID] = deck
 
 	return c.JSON(deck)
+}
+
+type drawDeckRequest struct {
+	Count int `json:"count"`
+}
+
+func drawDeckHandler(c *fiber.Ctx) error {
+	var req drawDeckRequest
+	err := c.BodyParser(&req)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Bad request",
+		})
+	}
+
+	if req.Count < 1 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Count must be greater than 0",
+		})
+	}
+
+	id := c.Params("id")
+	deck, ok := decks[id]
+	if !ok {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Deck not found",
+		})
+	}
+
+	if req.Count > deck.Remaining {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Count must be less than or equal to remaining cards",
+		})
+	}
+
+	cards := deck.Cards[:req.Count]
+	deck.Cards = deck.Cards[req.Count:]
+	deck.Remaining = len(deck.Cards)
+	decks[deck.ID] = deck
+
+	var responseCards []Card
+	for _, val := range cards {
+		card := Card{
+			Code:  val,
+			Type:  cardTypeMap[val[1:]],
+			Value: cardValueMap[val[:1]],
+		}
+		responseCards = append(responseCards, card)
+	}
+
+	return c.JSON(responseCards)
 }
 
 func (c Cards) shuffle() Cards {
