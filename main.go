@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"math/rand"
 
 	"github.com/gofiber/fiber/v2"
@@ -12,7 +13,7 @@ var decks = make(map[string]Deck)
 func main() {
 	app := fiber.New()
 	app.Get("/decks/:id", getDeck)
-	app.Post("/decks", createDecHandler)
+	app.Post("/decks", createDeckHandler)
 	app.Post("/decks/:id/draw", drawDeckHandler)
 	app.Listen(":3000")
 }
@@ -43,7 +44,7 @@ type createDeckRequest struct {
 	Cards    []string `json:"cards"`
 }
 
-func createDecHandler(c *fiber.Ctx) error {
+func createDeckHandler(c *fiber.Ctx) error {
 	var req createDeckRequest
 	err := c.BodyParser(&req)
 	if err != nil {
@@ -53,6 +54,16 @@ func createDecHandler(c *fiber.Ctx) error {
 	}
 
 	cards := Cards(FullCardDecks[:])
+	if len(req.Cards) > 0 {
+		cards = req.Cards
+		err := cards.validate()
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		}
+	}
+
 	if req.Shuffled {
 		cards = cards.shuffle()
 	}
@@ -118,6 +129,37 @@ func drawDeckHandler(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(responseCards)
+}
+
+func (c Cards) validate() error {
+	cards := Cards(FullCardDecks[:])
+	cardPool := make(map[string]bool)
+	for _, val := range c {
+		if _, ok := cardPool[val]; ok {
+			return errors.New("duplicate card: " + val)
+		}
+
+		if !cards.contain(val) {
+			return errors.New("invalid card: " + val)
+		}
+
+		cardPool[val] = true
+	}
+
+	if len(c) > 52 {
+		return errors.New("too many cards")
+	}
+
+	return nil
+}
+
+func (c Cards) contain(card string) bool {
+	for _, val := range c {
+		if val == card {
+			return true
+		}
+	}
+	return false
 }
 
 func (c Cards) shuffle() Cards {
