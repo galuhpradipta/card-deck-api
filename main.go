@@ -6,14 +6,23 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+
+	"github.com/galuhpradipta/card-deck-api/handlers"
+	"github.com/galuhpradipta/card-deck-api/repositories"
+	"github.com/galuhpradipta/card-deck-api/services"
 )
 
 var decks = make(map[string]Deck)
 
 func main() {
+	deckRepository := repositories.NewDeckRepository()
+	deckService := services.NewDeckService(deckRepository)
+	deckHandler := handlers.NewDeckHandler(deckService)
+
 	app := fiber.New()
+
 	app.Get("/decks/:id", getDeck)
-	app.Post("/decks", createDeckHandler)
+	app.Post("/decks", deckHandler.CreateDeck)
 	app.Post("/decks/:id/draw", drawDeckHandler)
 	app.Listen(":3000")
 }
