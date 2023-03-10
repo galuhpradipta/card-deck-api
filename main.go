@@ -1,11 +1,7 @@
 package main
 
 import (
-	"errors"
-	"math/rand"
-
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 
 	"github.com/galuhpradipta/card-deck-api/handlers"
 	"github.com/galuhpradipta/card-deck-api/repositories"
@@ -46,47 +42,6 @@ type Deck struct {
 	Shuffled  bool     `json:"shuffled"`
 	Remaining int      `json:"remaining"`
 	Cards     []string `json:"cards"`
-}
-
-type createDeckRequest struct {
-	Shuffled bool     `json:"shuffled"`
-	Cards    []string `json:"cards"`
-}
-
-func createDeckHandler(c *fiber.Ctx) error {
-	var req createDeckRequest
-	err := c.BodyParser(&req)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Bad request",
-		})
-	}
-
-	cards := Cards(FullCardDecks[:])
-	if len(req.Cards) > 0 {
-		cards = req.Cards
-		err := cards.validate()
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": err.Error(),
-			})
-		}
-	}
-
-	if req.Shuffled {
-		cards = cards.shuffle()
-	}
-
-	id := uuid.New().String()
-	deck := Deck{
-		ID:        id,
-		Shuffled:  false,
-		Remaining: len(cards),
-		Cards:     cards,
-	}
-	decks[deck.ID] = deck
-
-	return c.JSON(deck)
 }
 
 type drawDeckRequest struct {
@@ -138,45 +93,6 @@ func drawDeckHandler(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(responseCards)
-}
-
-func (c Cards) validate() error {
-	cards := Cards(FullCardDecks[:])
-	cardPool := make(map[string]bool)
-	for _, val := range c {
-		if _, ok := cardPool[val]; ok {
-			return errors.New("duplicate card: " + val)
-		}
-
-		if !cards.contain(val) {
-			return errors.New("invalid card: " + val)
-		}
-
-		cardPool[val] = true
-	}
-
-	if len(c) > 52 {
-		return errors.New("too many cards")
-	}
-
-	return nil
-}
-
-func (c Cards) contain(card string) bool {
-	for _, val := range c {
-		if val == card {
-			return true
-		}
-	}
-	return false
-}
-
-func (c Cards) shuffle() Cards {
-	//TODO: add seed
-	rand.Shuffle(len(c), func(i, j int) {
-		c[i], c[j] = c[j], c[i]
-	})
-	return c
 }
 
 func getDeck(c *fiber.Ctx) error {
