@@ -42,6 +42,23 @@ func (s *deckService) Create(shuffled bool, cards []string) (shared.Deck, error)
 	}, nil
 }
 
+func (s *deckService) GetByID(id string) (shared.Deck, error) {
+	deck, err := s.deckRepository.GetDeck(id)
+	if err != nil {
+		return shared.Deck{}, err
+	}
+
+	for _, v := range deck.Pool {
+		deck.Cards = append(deck.Cards, shared.Card{
+			Value: v[:len(v)-1],
+			Suit:  v[len(v)-1:],
+			Code:  v,
+		})
+	}
+
+	return deck, nil
+}
+
 var fullCardDecks = []string{
 	"AC", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "TC", "JC", "QC", "KC",
 	"AD", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "TD", "JD", "QD", "KD",

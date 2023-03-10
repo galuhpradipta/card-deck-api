@@ -34,13 +34,13 @@ func (r *deckRepository) Create(pool []string, shuffled bool) string {
 	return deck.ID
 }
 
-// func (r *DeckRepository) GetDeck(id string) (shared.Deck, error) {
-// 	deck, ok := r.Decks[id]
-// 	if !ok {
-// 		return deck, shared.ErrDeckNotFound
-// 	}
-// 	return deck, nil
-// }
+func (r *deckRepository) GetDeck(id string) (shared.Deck, error) {
+	deck, ok := r.Decks[id]
+	if !ok {
+		return deck, shared.ErrDeckNotFound
+	}
+	return deck, nil
+}
 
 // func (r *DeckRepository) Draw(id string, count int) (shared.Deck, bool) {
 // 	deck, ok := r.Decks[id]

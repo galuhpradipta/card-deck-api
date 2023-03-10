@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/galuhpradipta/card-deck-api/handlers"
@@ -16,11 +18,11 @@ func main() {
 	deckHandler := handlers.NewDeckHandler(deckService)
 
 	app := fiber.New()
-
-	app.Get("/decks/:id", getDeck)
+	app.Get("/decks/:id", deckHandler.GetByID)
 	app.Post("/decks", deckHandler.Create)
 	app.Post("/decks/:id/draw", drawDeckHandler)
-	app.Listen(":3000")
+
+	log.Fatal(app.Listen(":3000"))
 }
 
 var FullCardDecks = [52]string{

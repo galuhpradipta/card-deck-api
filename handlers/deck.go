@@ -34,6 +34,24 @@ func (h *deckHandler) Create(c *fiber.Ctx) error {
 	return c.JSON(deck)
 }
 
+func (h *deckHandler) GetByID(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Deck ID is required",
+		})
+	}
+
+	deck, err := h.deckService.GetByID(id)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(deck)
+}
+
 type createDeckRequest struct {
 	Shuffled bool     `json:"shuffled"`
 	Cards    []string `json:"cards"`
