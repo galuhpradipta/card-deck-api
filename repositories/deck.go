@@ -7,32 +7,27 @@ import (
 	"github.com/google/uuid"
 )
 
-var fullCardDecks = [52]string{
-	"AC", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "TC", "JC", "QC", "KC",
-	"AD", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "TD", "JD", "QD", "KD",
-	"AH", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "TH", "JH", "QH", "KH",
-	"AS", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "TS", "JS", "QS", "KS",
-}
-
 type deckRepository struct {
-	Decks map[string]shared.Deck
+	Decks         map[string]shared.Deck
+	FullCardDecks []string
 }
 
-func NewDeckRepository() DeckRepository {
+func NewDeckRepository(fullCardDecks []string) DeckRepository {
 	return &deckRepository{
-		Decks: make(map[string]shared.Deck),
+		Decks:         make(map[string]shared.Deck),
+		FullCardDecks: fullCardDecks,
 	}
 }
 
 func (r *deckRepository) Create(pool []string, shuffled bool) string {
 	deck := shared.Deck{
-		ID:       r.generateID(),
+		DeckID:   r.generateID(),
 		Shuffled: shuffled,
 		Pool:     pool,
 	}
 
-	r.Decks[deck.ID] = deck
-	return deck.ID
+	r.Decks[deck.DeckID] = deck
+	return deck.DeckID
 }
 
 func (r *deckRepository) GetDeck(id string) (shared.Deck, error) {
@@ -49,6 +44,10 @@ func (r *deckRepository) Update(id string, pool []string, shuffled bool) {
 	deck.Pool = pool
 	deck.Shuffled = shuffled
 	r.Decks[id] = deck
+}
+
+func (r *deckRepository) GetFullCardDecks() []string {
+	return r.FullCardDecks
 }
 
 func (r *deckRepository) generateID() string {

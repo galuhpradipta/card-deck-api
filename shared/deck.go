@@ -13,7 +13,7 @@ type Card struct {
 }
 
 type Deck struct {
-	ID        string   `json:"id"`
+	DeckID    string   `json:"deck_id"`
 	Shuffled  bool     `json:"shuffled"`
 	Remaining int      `json:"remaining"`
 	Cards     []Card   `json:"cards,omitempty"`
