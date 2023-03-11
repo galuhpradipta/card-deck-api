@@ -7,6 +7,10 @@ import (
 	"github.com/google/uuid"
 )
 
+var (
+	ErrDeckNotFound = errors.New("Deck not found")
+)
+
 type deckRepository struct {
 	Decks         map[string]shared.Deck
 	FullCardDecks []string
@@ -19,7 +23,7 @@ func NewDeckRepository(fullCardDecks []string) DeckRepository {
 	}
 }
 
-func (r *deckRepository) Create(pool []string, shuffled bool) string {
+func (r *deckRepository) Create(pool []string, shuffled bool) shared.Deck {
 	deck := shared.Deck{
 		DeckID:   r.generateID(),
 		Shuffled: shuffled,
@@ -27,23 +31,28 @@ func (r *deckRepository) Create(pool []string, shuffled bool) string {
 	}
 
 	r.Decks[deck.DeckID] = deck
-	return deck.DeckID
+	return deck
 }
 
 func (r *deckRepository) GetDeck(id string) (shared.Deck, error) {
 	deck, ok := r.Decks[id]
 	if !ok {
-		return deck, errors.New("Deck not found")
+		return deck, ErrDeckNotFound
 	}
 	deck.Remaining = len(deck.Pool)
 	return deck, nil
 }
 
-func (r *deckRepository) Update(id string, pool []string, shuffled bool) {
+func (r *deckRepository) Update(id string, pool []string, shuffled bool) (shared.Deck, error) {
+	if r.Decks[id].DeckID != id {
+		return shared.Deck{}, ErrDeckNotFound
+	}
+
 	deck := r.Decks[id]
 	deck.Pool = pool
 	deck.Shuffled = shuffled
 	r.Decks[id] = deck
+	return deck, nil
 }
 
 func (r *deckRepository) GetFullCardDecks() []string {

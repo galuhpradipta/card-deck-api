@@ -33,12 +33,11 @@ func (s *deckService) Create(shuffled bool, cards []string) (shared.Deck, error)
 		deckCards = shuffle(deckCards)
 	}
 
-	deckID := s.deckRepository.Create(deckCards, shuffled)
-
+	deck := s.deckRepository.Create(deckCards, shuffled)
 	return shared.Deck{
-		DeckID:    deckID,
+		DeckID:    deck.DeckID,
 		Shuffled:  shuffled,
-		Remaining: len(deckCards),
+		Remaining: len(deck.Pool),
 	}, nil
 }
 
