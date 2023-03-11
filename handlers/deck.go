@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"errors"
+
 	"github.com/galuhpradipta/card-deck-api/services"
 	"github.com/gofiber/fiber/v2"
 )
@@ -18,7 +20,7 @@ func NewDeckHandler(deckService services.DeckService) DeckHandler {
 func (h *deckHandler) Create(c *fiber.Ctx) error {
 	var req createDeckRequest
 	err := c.BodyParser(&req)
-	if err != nil {
+	if err != nil && !errors.Is(err, fiber.ErrUnprocessableEntity) {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": err.Error(),
 		})
