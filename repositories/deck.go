@@ -25,9 +25,10 @@ func NewDeckRepository(fullCardDecks []string) DeckRepository {
 
 func (r *deckRepository) Create(pool []string, shuffled bool) shared.Deck {
 	deck := shared.Deck{
-		DeckID:   r.generateID(),
-		Shuffled: shuffled,
-		Pool:     pool,
+		DeckID:    r.generateID(),
+		Shuffled:  shuffled,
+		Remaining: len(pool),
+		Pool:      pool,
 	}
 
 	r.Decks[deck.DeckID] = deck

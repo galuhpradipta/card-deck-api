@@ -53,9 +53,9 @@ func Test_deckRepository_GetDeck(t *testing.T) {
 	tests := []test{
 		{
 			name:   "Get deck with valid deckID",
-			deckID: mockTestID,
+			deckID: MockTestID,
 			wantDeck: shared.Deck{
-				DeckID:    mockTestID,
+				DeckID:    MockTestID,
 				Shuffled:  false,
 				Pool:      shared.FullCardDecks,
 				Remaining: len(shared.FullCardDecks),
@@ -94,7 +94,7 @@ func Test_deckRepository_Update(t *testing.T) {
 	tests := []test{
 		{
 			name:     "Update deck with valid deckID",
-			deckID:   mockTestID,
+			deckID:   MockTestID,
 			pool:     partialDeck,
 			shuffled: true,
 			wantPool: partialDeck,
@@ -110,7 +110,7 @@ func Test_deckRepository_Update(t *testing.T) {
 		},
 		{
 			name:     "Update deck with empty pool",
-			deckID:   mockTestID,
+			deckID:   MockTestID,
 			pool:     []string{},
 			shuffled: true,
 			wantPool: []string{},

@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	mockTestID = "test-id"
+	MockTestID = "test-id"
 )
 
 type mockDeckRepository struct {
@@ -15,10 +15,11 @@ type mockDeckRepository struct {
 
 func NewMockDeckRepository() DeckRepository {
 	mockDecks := make(map[string]shared.Deck)
-	mockDecks[mockTestID] = shared.Deck{
-		DeckID:   mockTestID,
-		Shuffled: false,
-		Pool:     shared.FullCardDecks,
+	mockDecks[MockTestID] = shared.Deck{
+		DeckID:    MockTestID,
+		Shuffled:  false,
+		Pool:      shared.FullCardDecks,
+		Remaining: len(shared.FullCardDecks),
 	}
 
 	return &mockDeckRepository{
@@ -28,7 +29,7 @@ func NewMockDeckRepository() DeckRepository {
 }
 
 func (r *mockDeckRepository) Create(pool []string, shuffled bool) shared.Deck {
-	return r.Decks[mockTestID]
+	return r.Decks[MockTestID]
 }
 
 func (r *mockDeckRepository) GetDeck(id string) (shared.Deck, error) {
