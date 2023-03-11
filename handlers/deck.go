@@ -77,7 +77,9 @@ func (h *deckHandler) Draw(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(cards)
+	return c.JSON(fiber.Map{
+		"cards": cards,
+	})
 }
 
 type drawDeckRequest struct {
