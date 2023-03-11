@@ -135,7 +135,7 @@ var suitMap = map[string]string{
 }
 
 var valueMap = map[string]string{
-	"A": "Ace",
+	"A": "ACE",
 	"2": "2",
 	"3": "3",
 	"4": "4",
