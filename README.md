@@ -17,7 +17,7 @@ $ git clone https://github.com/galuhpradipta/card-deck-api
 ## Run the application:
 
 ```bash
-go run main.go
+$ go run main.go
 
 ```
 
